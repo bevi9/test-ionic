@@ -1,0 +1,64 @@
+import { Component } from '@angular/core';
+import { IonicPage, NavController, NavParams } from 'ionic-angular';
+
+import { Items } from '../../providers';
+
+import { OpenSheetMusicDisplay } from 'opensheetmusicdisplay'
+
+@IonicPage()
+@Component({
+  selector: 'page-item-detail',
+  templateUrl: 'item-detail.html'
+})
+export class ItemDetailPage {
+  item: any;
+  osmd: OpenSheetMusicDisplay;
+
+  constructor(public navCtrl: NavController, navParams: NavParams, items: Items) {
+    this.item = navParams.get('item') || items.defaultItem;
+
+    this.loadMusicXML("assets/MuzioClementi_SonatinaOpus36No1_Part1.xml");
+
+  }
+
+  public loadMusicXML(url: string) {
+
+    let container: HTMLElement = <HTMLElement>document.createElement("div");
+    /*
+     * ... and attach it to our HTML document's body. The document itself is a HTML5
+     * stub created by Webpack, so you won't find any actual .html sources.
+     */
+    document.body.appendChild(container);
+    osmd = new OpenSheetMusicDisplay(container, false);
+    osmd.setLogLevel('info');
+
+
+  var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function () {
+      switch (xhttp.readyState) {
+        case 0 : // UNINITIALIZED
+        case 1 : // LOADING
+        case 2 : // LOADED
+        case 3 : // INTERACTIVE
+          break;
+        case 4 : // COMPLETED
+          osmd
+            .load(xhttp.responseXML)
+            .then(
+              () => osmd.render(),
+              (err) => console.log(err)
+            );
+          break;
+        default:
+          throw("Error loading MusicXML file.");
+      }
+    }
+    xhttp.open("GET", url, true);
+    xhttp.send();
+    osmd.cursor.show();
+  osmd.cursor.update();
+    osmd.cursor.next();
+
+  }
+
+}
